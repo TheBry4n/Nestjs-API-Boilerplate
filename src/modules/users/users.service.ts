@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { CreateUserDto } from './users-dto';
+import { CreateUserRequestDto, CreateUserResponseDto } from './users-dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PasswordService } from '../../utils/password.service';
 
@@ -10,7 +10,7 @@ export class UsersService {
         private readonly passwordService: PasswordService,
     ) {}
 
-    async createUser(body: CreateUserDto) {
+    async createUser(body: CreateUserRequestDto): Promise<CreateUserResponseDto> {
         try{
             const hashedPassword = await this.passwordService.hashPassword(body.password);
             body.password = hashedPassword;
@@ -19,7 +19,16 @@ export class UsersService {
                     ...body,
                 }
             })
-            return user;
+            return {
+                message: 'User created successfully',
+                user_info: {
+                    id: user.id,
+                    email: user.email,
+                    username: user.username,
+                    name: user.name,
+                    surname: user.surname,
+                },
+            };
         } catch (error) {
             throw new BadRequestException(error);
         }
