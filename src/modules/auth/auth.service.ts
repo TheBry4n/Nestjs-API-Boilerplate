@@ -3,13 +3,15 @@ import { LoginRequestDto, LoginResponseDto } from './auth-dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from 'src/utils/jwt.service';
 import { PasswordService } from 'src/utils/password.service';
+import { RedisService } from 'src/utils/redis.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
-        private readonly passwordService: PasswordService
+        private readonly passwordService: PasswordService,
+        private readonly redisService: RedisService,
     ) {}
     
     async login(body: LoginRequestDto): Promise<LoginResponseDto> {
@@ -29,6 +31,16 @@ export class AuthService {
             }
             
             const tokens = await this.jwtService.generateTokens(user.id);
+
+            const session = await this.redisService.getSession(user.id);
+            if(session) {
+                await this.redisService.deleteSession(user.id);
+            }
+
+            const access_jti = (await this.jwtService.getTokenPayload(tokens.accessToken)).jti;
+            const refresh_jti = (await this.jwtService.getTokenPayload(tokens.refreshToken)).jti;
+            await this.redisService.createSession(user.id, access_jti, refresh_jti);
+
             return {
                 message: 'Login successful',
                 tokens: tokens,

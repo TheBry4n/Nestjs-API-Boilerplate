@@ -2,17 +2,20 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import { JwtConfig } from 'src/config/jwt.config';
 import { Tokens, TokenPayload } from '../types';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class JwtService {
     constructor(private readonly jwt: NestJwtService) {}
 
     async generateTokens(userId: string): Promise<Tokens> {
-        const access_payload = {
+        const access_payload: TokenPayload = {
+            jti: randomUUID().toString(),
             sub: userId,
             type: 'access',
         }
-        const refresh_payload = {
+        const refresh_payload: TokenPayload = {
+            jti: randomUUID().toString(),
             sub: userId,
             type: 'refresh',
         }

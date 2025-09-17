@@ -3,6 +3,7 @@ import { PasswordService } from './password.service';
 import { JwtService } from './jwt.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConfig } from '../config/jwt.config';
+import { RedisService } from './redis.service';
 
 @Global()
 @Module({
@@ -14,7 +15,7 @@ import { JwtConfig } from '../config/jwt.config';
             },
         }),
     ],
-    providers: [PasswordService, JwtService],
-    exports: [PasswordService, JwtService],
+    providers: [PasswordService, JwtService, RedisService],
+    exports: [PasswordService, JwtService, RedisService],
 })
 export class UtilsModule {}
