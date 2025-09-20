@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import { LoginRequestDto, LoginResponseDto } from './auth-dto';
+import { LoginRequestDto, LoginResponseDto, LogoutResponseDto } from './auth-dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from 'src/utils/jwt.service';
 import { PasswordService } from 'src/utils/password.service';
@@ -47,6 +47,17 @@ export class AuthService {
             }
         } catch (error) {
             throw new InternalServerErrorException('Internal server error during login');
+        }
+    }
+
+    async logout(user_id: string): Promise<LogoutResponseDto> {
+        try{
+            await this.redisService.deleteSession(user_id);
+            return {
+                message: 'Logout successful',
+            }
+        } catch (error) {
+            throw new InternalServerErrorException('Internal server error during logout');
         }
     }
 }
